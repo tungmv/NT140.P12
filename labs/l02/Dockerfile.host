@@ -1,0 +1,14 @@
+FROM ubuntu:20.04
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    net-tools \
+    iputils-ping \
+    iproute2 \
+    telnet \
+    #wireshark \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+CMD ["tail", "-f", "/dev/null"]
