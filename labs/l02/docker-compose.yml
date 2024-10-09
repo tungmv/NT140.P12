@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   host_u:
@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile.host
     container_name: host_u
     networks:
-      nat_network:
+      l02_nat_network:
         ipv4_address: 10.0.2.7
     cap_add:
       - NET_ADMIN
@@ -20,8 +20,8 @@ services:
       dockerfile: Dockerfile.host
     container_name: host_v
     networks:
-      internal_network:
-        ipv4_address: 192.168.60.101
+      l02_internal_network:
+        ipv4_address: 192.168.60.5
     cap_add:
       - NET_ADMIN
 
@@ -31,21 +31,21 @@ services:
       dockerfile: Dockerfile.gateway
     container_name: gateway
     networks:
-      nat_network:
-        ipv4_address: 10.0.2.8
-      internal_network:
-        ipv4_address: 192.168.60.1
+      l02_nat_network:
+        ipv4_address: 10.0.2.2
+      l02_internal_network:
+        ipv4_address: 192.168.60.15
     cap_add:
       - NET_ADMIN
     volumes:
       - ./vpn:/app/vpn
 
 networks:
-  nat_network:
+  l02_nat_network:
     ipam:
       config:
         - subnet: 10.0.2.0/24
-  internal_network:
+  l02_internal_network:
     ipam:
       config:
         - subnet: 192.168.60.0/24

@@ -14,4 +14,4 @@ WORKDIR /app
 COPY vpn/vpn-setup-server.sh /app/vpn-setup-server.sh
 RUN chmod +x /app/vpn-setup-server.sh
 
-CMD ["/app/a.sh"]
+CMD ["tail", "-f", "/dev/null"]
