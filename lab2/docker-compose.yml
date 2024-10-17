@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  host_u:
+    build:
+      context: .
+      dockerfile: Dockerfile.host
+    container_name: host_u
+    networks:
+      l02_nat_network:
+        ipv4_address: 10.0.2.7
+      l02_internal_network:
+        ipv4_address: 192.168.60.6
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    privileged: true
+
+  host_v:
+    build:
+      context: .
+      dockerfile: Dockerfile.host
+    container_name: host_v
+    networks:
+      l02_internal_network:
+        ipv4_address: 192.168.60.5
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    ports:
+      - "23:23"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    container_name: gateway
+    networks:
+      l02_nat_network:
+        ipv4_address: 10.0.2.2
+      l02_internal_network:
+        ipv4_address: 192.168.60.15
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    privileged: true
+    volumes:
+      - ./vpn:/app/vpn
+
+networks:
+  l02_nat_network:
+    ipam:
+      config:
+        - subnet: 10.0.2.0/24
+  l02_internal_network:
+    ipam:
+      config:
+        - subnet: 192.168.60.0/24

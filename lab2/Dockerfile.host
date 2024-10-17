@@ -1,0 +1,20 @@
+FROM ubuntu:20.04
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    net-tools \
+    iputils-ping \
+    iproute2 \
+    telnet \
+    xinetd \
+    telnetd \
+    iptables \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configure xinetd for telnet
+RUN echo "telnet stream tcp nowait telnetd /usr/sbin/tcpd /usr/sbin/in.telnetd" > /etc/xinetd.d/telnet && \
+    echo "telnet 23/tcp" >> /etc/services
+
+WORKDIR /app
+
+CMD ["xinetd", "-dontfork"]
