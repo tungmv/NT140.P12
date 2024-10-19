@@ -67,8 +67,21 @@ echo "Starting VPN client..."
 docker exec -d host_u /app/vpn/vpnclient
 sleep 5  # Give the client time to connect
 
-echo "Checking VPN connection..."
-docker exec host_u ping -c 4 10.0.2.2 || { echo "Failed to ping VPN server"; exit 1; }
+## Debug: Check if telnet service is running on host_v
+#echo "Checking telnet service on host_v..."
+#docker exec host_v netstat -tuln | grep :23 || { echo "Telnet service is not running on host_v"; }
+#
+## Debug: Check xinetd status on host_v
+#echo "Checking xinetd status on host_v..."
+#docker exec host_v service xinetd status
+#
+## Debug: Check if port 23 is open on host_v
+#echo "Checking if port 23 is open on host_v..."
+#docker exec host_u bash -c '(echo > /dev/tcp/192.168.60.8/23) >/dev/null 2>&1 && echo "Port 23 is open" || echo "Port 23 is closed"'
+#
+## Debug: Try telnet connection
+#echo "Attempting telnet connection..."
+#docker exec -it host_u telnet 192.168.60.8 23
 
 # Completion message
 echo "VPN setup complete. You can now access the containers using:"

@@ -1,4 +1,4 @@
-FROM debian:12
+FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -14,17 +14,31 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 COPY vpn /app/vpn
 
-# Compile VPN client
-RUN cd /app/vpn && make
-
 # Create TUN device
 RUN mkdir -p /dev/net && \
     mknod /dev/net/tun c 10 200 && \
     chmod 600 /dev/net/tun
 
 # Configure telnet service
-RUN echo "telnet stream tcp nowait telnetd /usr/sbin/tcpd /usr/sbin/in.telnetd" > /etc/xinetd.d/telnet && \
-    echo "telnet 23/tcp" >> /etc/services
+RUN echo "telnet     stream  tcp     nowait  root    /usr/sbin/in.telnetd      in.telnetd" >> /etc/inetd.conf
+
+# Enable telnet service in xinetd
+RUN echo "service telnet" > /etc/xinetd.d/telnet && \
+    echo "{" >> /etc/xinetd.d/telnet && \
+    echo "    disable = no" >> /etc/xinetd.d/telnet && \
+    echo "    flags = REUSE" >> /etc/xinetd.d/telnet && \
+    echo "    socket_type = stream" >> /etc/xinetd.d/telnet && \
+    echo "    wait = no" >> /etc/xinetd.d/telnet && \
+    echo "    user = root" >> /etc/xinetd.d/telnet && \
+    echo "    server = /usr/sbin/in.telnetd" >> /etc/xinetd.d/telnet && \
+    echo "    log_on_failure += USERID" >> /etc/xinetd.d/telnet && \
+    echo "}" >> /etc/xinetd.d/telnet
+
+# Ensure telnet is in /etc/services
+RUN echo "telnet          23/tcp" >> /etc/services
+
+# Set root password
+RUN echo 'root:root' | chpasswd
 
 # Start xinetd and keep container running
-CMD ["sh", "-c", "xinetd -dontfork & tail -f /dev/null"]
+CMD ["sh", "-c", "service xinetd restart && tail -f /dev/null"]
