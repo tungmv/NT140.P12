@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM debian:12
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -9,11 +9,19 @@ RUN apt-get update && apt-get install -y \
     telnetd \
     iptables \
     uml-utilities \
+    procps \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-COPY vpn/vpn-setup-server.sh /app/vpn-setup-server.sh
-RUN chmod +x /app/vpn-setup-server.sh
+# Copy VPN files
+COPY vpn /app/vpn
 
-CMD ["tail", "-f", "/dev/null"]
+# Compile VPN server
+RUN cd /app/vpn && make
+
+RUN mkdir -p /dev/net && \
+    mknod /dev/net/tun c 10 200 && \
+    chmod 600 /dev/net/tun
+
+CMD ["sh", "-c", "if [ \"$(cat /proc/sys/net/ipv4/ip_forward)\" != \"1\" ]; then echo 1 > /proc/sys/net/ipv4/ip_forward; fi && /app/vpn/vpnserver & tail -f /dev/null"]

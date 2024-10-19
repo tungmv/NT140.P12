@@ -10,11 +10,11 @@ services:
       l02_nat_network:
         ipv4_address: 10.0.2.7
       l02_internal_network:
-        ipv4_address: 192.168.60.6
+        ipv4_address: 192.168.60.7
     cap_add:
       - NET_ADMIN
-      - SYS_MODULE
-    privileged: true
+    volumes:
+      - ./vpn:/app/vpn
 
   host_v:
     build:
@@ -23,10 +23,9 @@ services:
     container_name: host_v
     networks:
       l02_internal_network:
-        ipv4_address: 192.168.60.5
+        ipv4_address: 192.168.60.8
     cap_add:
       - NET_ADMIN
-      - SYS_MODULE
     ports:
       - "23:23"
 
@@ -39,11 +38,10 @@ services:
       l02_nat_network:
         ipv4_address: 10.0.2.2
       l02_internal_network:
-        ipv4_address: 192.168.60.15
+        ipv4_address: 192.168.60.9
     cap_add:
       - NET_ADMIN
-      - SYS_MODULE
-    privileged: true
+      - NET_RAW
     volumes:
       - ./vpn:/app/vpn
 

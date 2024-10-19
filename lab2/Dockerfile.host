@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM debian:12
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -11,10 +11,20 @@ RUN apt-get update && apt-get install -y \
     iptables \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure xinetd for telnet
+WORKDIR /app
+COPY vpn /app/vpn
+
+# Compile VPN client
+RUN cd /app/vpn && make
+
+# Create TUN device
+RUN mkdir -p /dev/net && \
+    mknod /dev/net/tun c 10 200 && \
+    chmod 600 /dev/net/tun
+
+# Configure telnet service
 RUN echo "telnet stream tcp nowait telnetd /usr/sbin/tcpd /usr/sbin/in.telnetd" > /etc/xinetd.d/telnet && \
     echo "telnet 23/tcp" >> /etc/services
 
-WORKDIR /app
-
-CMD ["xinetd", "-dontfork"]
+# Start xinetd and keep container running
+CMD ["sh", "-c", "xinetd -dontfork & tail -f /dev/null"]
